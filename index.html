@@ -222,6 +222,10 @@ form{display:flex;flex-direction:column;gap:13px}
 .q-amal button{padding:4px 11px;border:1px solid var(--chiziq);border-radius:7px;
   background:transparent;color:var(--xira);font-size:11.5px;font-weight:600;cursor:pointer}
 .q-amal button:hover{border-color:var(--asos);color:var(--asos)}
+.q-holat{display:inline-block;margin-top:9px;padding:3px 9px;border-radius:6px;font-size:10.5px;
+  font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--hc);background:var(--hf)}
+.q-holat[data-holat="kutilmoqda"]{--hc:#8a5a0e;--hf:#fdf1d6}
+.q-holat[data-holat="tasdiq"]{--hc:#1f7a4d;--hf:#e2f3eb}
 .fayl-amal{display:flex;gap:9px;flex-wrap:wrap;margin-top:14px}
 .fayl-amal button{padding:7px 13px;border:1px solid var(--chiziq);border-radius:8px;
   background:var(--mato);color:var(--xira);font-size:12.5px;font-weight:600;cursor:pointer}
@@ -278,9 +282,9 @@ form{display:flex;flex-direction:column;gap:13px}
 
 <section class="taklif-band"><div class="ichi">
   <h2 id="qoshish">Tadbir qo'shish</h2>
-  <p class="tavsif">Yangi tadbirni shu yerdan kiriting — u darhol yuqoridagi jadvalga tushadi.
-     Qo'shilgan tadbirlar shu brauzerda saqlanadi; boshqalarga berish uchun «JSON yuklab olish»
-     tugmasidan foydalaning.</p>
+  <p class="tavsif">Yangi tadbirni shu yerdan kiriting. Tadbir avval maktab ma'muriga tasdiqlash
+     uchun boradi — u tasdiqlagandan keyin hammaning jadvalida ko'rinadi. Tasdiq kutilayotgan
+     tadbir faqat sizda, «kutilmoqda» belgisi bilan turadi.</p>
   <div class="ikki">
     <form id="forma" novalidate>
       <div class="juft">
@@ -331,12 +335,12 @@ form{display:flex;flex-direction:column;gap:13px}
       <h3 id="q-sarlavha">Qo'shilgan tadbirlar</h3>
       <div class="t-royxat" id="q-royxat"></div>
       <div class="fayl-amal">
+        <button type="button" id="yangila">Yangilash</button>
         <button type="button" id="eksport">JSON yuklab olish</button>
         <button type="button" id="import">JSON yuklash</button>
         <input type="file" id="fayl" accept="application/json,.json" hidden>
       </div>
-      <p class="holat-satr">Qo'shilgan tadbirlar faqat shu brauzerda saqlanadi.
-         Boshqa kompyuterga yoki umumiy rejaga o'tkazish uchun JSON faylni yuboring.</p>
+      <p class="holat-satr" id="api-holat">Serverga ulanmoqda…</p>
     </div>
   </div>
 </div></section>
@@ -352,7 +356,9 @@ const TUR_RANG = { taqdimot:'var(--t-taqdimot)', ekskursiya:'var(--t-ekskursiya)
   musobaqa:'var(--t-musobaqa)', kun:'var(--t-kun)', maktab:'var(--t-maktab)' };
 
 let oyIdx = 0, tanlov = null, sinfFiltr = 'all', korinish = 'oy';
-let QOSHIL = [];          // qo'shilgan tadbirlar (brauzerda saqlanadi)
+let QOSHIL = [];          // mening yuborganlarim (brauzerda saqlanadi, tasdiq kutilmoqda)
+let TASDIQ = [];          // ma'mur tasdiqlagan tadbirlar — hammaga ko'rinadi
+let apiBor = null;        // null: hali noma'lum, true/false: server javobi
 let tahrirId = null;      // tahrir qilinayotgan tadbir
 const SAQLAGICH = 'najot-tadbirlar-v1';
 
@@ -371,7 +377,41 @@ function qoshilYoz(){
 
 /** Shu oyning tadbirlari: rejadagi + qo'shilgan. */
 function oyTadbir(i){
-  return MA.oylar[i].tadbirlar.concat(QOSHIL.filter(q => q.oyIdx === i));
+  // Rejadagi tadbirlar + tasdiqlanganlar + o'zim yuborgan (hali tasdiqlanmagan) tadbirlar.
+  const tasdiqKod = new Set(TASDIQ.map(t => t.kod));
+  return MA.oylar[i].tadbirlar
+    .concat(TASDIQ.filter(t => t.oyIdx === i))
+    .concat(QOSHIL.filter(q => q.oyIdx === i && !tasdiqKod.has(q.kod)));
+}
+
+/** Tasdiqlanganlar ro'yxatini serverdan oladi. Server bo'lmasa sahifa baribir ishlaydi. */
+async function apiYukla(){
+  try {
+    const j = await fetch('/api/tadbirlar', { cache: 'no-store' });
+    if (!j.ok) throw new Error(j.status);
+    const d = await j.json();
+    TASDIQ = Array.isArray(d.tadbirlar) ? d.tadbirlar : [];
+    apiBor = !d.sozlanmagan;
+    // Tasdiqlangani kelgan bo'lsa, mahalliy nusxasi kerak emas.
+    const bor = new Set(TASDIQ.map(t => t.kod));
+    const oldin = QOSHIL.length;
+    QOSHIL = QOSHIL.filter(q => !bor.has(q.kod));
+    if (QOSHIL.length !== oldin) qoshilYoz();
+  } catch (e){
+    apiBor = false;
+  }
+  chiz();
+  holatYozuv();
+}
+
+function holatYozuv(){
+  const h = document.getElementById('api-holat');
+  if (!h) return;
+  if (apiBor === null) h.textContent = 'Serverga ulanmoqda…';
+  else if (apiBor) h.textContent = "Qo'shilgan tadbir avval ma'murga tasdiqlash uchun boradi. "
+    + "Tasdiqlangach hammaning jadvalida ko'rinadi.";
+  else h.textContent = "Server ulanmagan — tadbir faqat shu brauzerda saqlanadi. "
+    + "Boshqalarga berish uchun JSON faylni yuklab oling.";
 }
 
 const esc = (x) => String(x ?? '').replace(/[&<>"']/g, (c) =>
@@ -547,7 +587,8 @@ function tadbirKart(t, sanaBilan){
   return `<button class="kart${t.qoshilgan ? ' qoshil' : ''}" type="button"
       data-kod="${esc(t.kod)}" data-tur="${esc(t.tur)}"
       aria-pressed="${tanlov === t.kod}" title="${esc(t.nom)}">
-    <span class="tur">${esc(MA.turNom[t.tur] || '')}${t.qoshilgan ? ' · yangi' : ''}</span>
+    <span class="tur">${esc(MA.turNom[t.tur] || '')}${
+      t.holat === 'kutilmoqda' ? ' · kutilmoqda' : t.qoshilgan ? ' · yangi' : ''}</span>
     <span class="nom">${esc(t.nom)}</span>
     <span class="kim">${sanaBilan ? esc(kartSana(t)) + ' · ' : ''}${
       esc(MA.fanNom[t.fan] || (t.fan === 'boshqa' ? 'Boshqa' : t.fan) || '')}${
@@ -577,7 +618,8 @@ function tafsilotChiz(){
         <span class="yor rang">${esc(MA.turNom[t.tur] || '')}</span>
         <span class="yor">${esc(MA.fanNom[t.fan] || 'Boshqa')}</span>
         <span class="yor">${esc(t.kun)}-${esc(t.oy)} · ${esc(t.hafta || '')}</span>
-        <span class="yor">Qo'shilgan</span>
+        <span class="q-holat" data-holat="${t.holat === 'kutilmoqda' ? 'kutilmoqda' : 'tasdiq'}"
+          style="margin:0">${t.holat === 'kutilmoqda' ? 'Tasdiq kutilmoqda' : 'Tasdiqlangan'}</span>
       </div>
       <h2>${esc(t.nom)}</h2>
       <p class="t-izoh">${esc(t.izoh || '')}</p>
@@ -588,8 +630,9 @@ function tafsilotChiz(){
         ${fakt('Nima kerak', t.kerak)}
       </div>
       <div class="q-amal" style="margin-top:18px">
+        ${QOSHIL.some(q => q.kod === t.kod) ? `
         <button type="button" data-tahrir="${esc(t.kod)}">Tahrirlash</button>
-        <button type="button" data-ochir="${esc(t.kod)}">O'chirish</button>
+        <button type="button" data-ochir="${esc(t.kod)}">O'chirish</button>` : ''}
       </div>
     </div>`;
     return;
@@ -684,30 +727,76 @@ function formaToza(){
   sinfTanlovChiz();
 }
 
-function qoshish(){
+async function qoshish(){
   const d = formaOqi();
   const x = tekshir(d);
   if (x) return javobKor(x, true);
+  const tugma = document.getElementById('saqla');
   const n = new Date();
+  const sana = `${String(n.getDate()).padStart(2, '0')}.${
+    String(n.getMonth() + 1).padStart(2, '0')}.${n.getFullYear()}`;
+
   if (tahrirId){
     const eski = QOSHIL.find(q => q.kod === tahrirId);
     Object.assign(eski, d, { vaqtMatn: eski.vaqtMatn });
+    if (apiBor && eski.holat === 'kutilmoqda'){
+      tugma.disabled = true;
+      javobKor("Qayta yuborilmoqda…");
+      const j = await serverga(eski);
+      tugma.disabled = false;
+      if (!j) return;
+      eski.kod = j.id;
+    }
     javobKor('Tadbir yangilandi.');
+    qoshilYoz();
   } else {
-    const kod = 'q-' + n.getTime().toString(36) + Math.random().toString(36).slice(2, 6);
-    QOSHIL.push(Object.assign({ kod, qoshilgan: true, vaqt: n.toISOString(),
-      vaqtMatn: `${String(n.getDate()).padStart(2, '0')}.${
-        String(n.getMonth() + 1).padStart(2, '0')}.${n.getFullYear()}` }, d));
-    javobKor(`«${d.nom}» jadvalga qo'shildi — ${d.kun}-${d.oy}.`);
-    tanlov = kod;
+    const yangi = Object.assign({ kod: 'q-' + n.getTime().toString(36)
+      + Math.random().toString(36).slice(2, 6), qoshilgan: true, vaqt: n.toISOString(),
+      vaqtMatn: sana }, d);
+    if (apiBor){
+      tugma.disabled = true;
+      javobKor('Tasdiqlash uchun yuborilmoqda…');
+      const j = await serverga(yangi);
+      tugma.disabled = false;
+      if (!j) return;
+      yangi.kod = j.id;
+      yangi.holat = 'kutilmoqda';
+      javobKor(`«${d.nom}» tasdiqlash uchun yuborildi. Ma'mur tasdiqlagach hammaning `
+        + `jadvalida ko'rinadi; hozir faqat sizda turadi.`);
+    } else {
+      javobKor(`«${d.nom}» jadvalga qo'shildi — ${d.kun}-${d.oy}.`);
+    }
+    QOSHIL.push(yangi);
+    tanlov = yangi.kod;
+    qoshilYoz();
   }
-  qoshilYoz();
   oyIdx = d.oyIdx;
   const t = tahrirId;
   formaToza();
   if (t) tanlov = t;
   chiz();
   document.getElementById('jadval').scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+/** Tadbirni serverga yuboradi; xato bo'lsa sababini ko'rsatadi va null qaytaradi. */
+async function serverga(t){
+  try {
+    const j = await fetch('/api/taklif', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nom: t.nom, izoh: t.izoh, kerak: t.kerak, kim: t.kim, tur: t.tur,
+        fan: t.fan, oy: t.oy, oyIdx: t.oyIdx, kun: t.kun, sana: t.sana, hafta: t.hafta,
+        sinflar: t.sinflar }),
+    });
+    const d = await j.json().catch(() => ({}));
+    if (!j.ok){
+      javobKor(d.xato ? `Yuborilmadi: ${d.xato}` : 'Yuborilmadi, qayta urinib ko’ring.', true);
+      return null;
+    }
+    return d;
+  } catch (e){
+    javobKor('Tarmoq xatosi — internetni tekshirib, qayta urinib ko’ring.', true);
+    return null;
+  }
 }
 
 function tahrirla(kod){
@@ -745,25 +834,32 @@ function ochir(kod){
 
 function qoshilRoyxat(){
   const quti = document.getElementById('q-royxat');
+  const hammasi = QOSHIL.concat(TASDIQ);
   document.getElementById('q-sarlavha').textContent =
-    QOSHIL.length ? `Qo'shilgan tadbirlar (${QOSHIL.length})` : "Qo'shilgan tadbirlar";
-  if (!QOSHIL.length){
+    hammasi.length ? `Qo'shilgan tadbirlar (${hammasi.length})` : "Qo'shilgan tadbirlar";
+  if (!hammasi.length){
     quti.innerHTML = `<div class="bosh-holat">Hali qo'shilgan tadbir yo'q. Chapdagi shaklni
-      to'ldiring — tadbir darhol jadvalda paydo bo'ladi.</div>`;
+      to'ldiring — tadbir ma'mur tasdiqlagach jadvalga chiqadi.</div>`;
     return;
   }
-  const tartib = QOSHIL.slice().sort((a, b) => (a.sana || '').localeCompare(b.sana || ''));
-  quti.innerHTML = tartib.map(t => `<article class="q-kart">
+  const tartib = hammasi.slice().sort((a, b) => (a.sana || '').localeCompare(b.sana || ''));
+  quti.innerHTML = tartib.map(t => {
+    const kutmoqda = t.holat === 'kutilmoqda';
+    const meniki = QOSHIL.some(q => q.kod === t.kod);
+    return `<article class="q-kart">
     <div class="bosh"><b>${esc(t.nom)}</b>
       <span class="meta">${esc(t.kun)}-${esc(t.oy)} · ${esc(MA.turNom[t.tur] || t.tur)}</span></div>
     <span class="meta">${esc(t.sinflar.length ? t.sinflar.join(', ') : 'Butun maktab')}${
       t.kim ? ' · ' + esc(t.kim) : ''}</span>
     <p>${esc(t.izoh || '')}</p>
-    <div class="q-amal">
+    <span class="q-holat" data-holat="${kutmoqda ? 'kutilmoqda' : 'tasdiq'}">${
+      kutmoqda ? 'Tasdiq kutilmoqda' : 'Tasdiqlangan'}</span>
+    ${meniki ? `<div class="q-amal">
       <button type="button" data-tahrir="${esc(t.kod)}">Tahrirlash</button>
       <button type="button" data-ochir="${esc(t.kod)}">O'chirish</button>
-    </div>
-  </article>`).join('');
+    </div>` : ''}
+  </article>`;
+  }).join('');
 }
 
 async function eksport(){
@@ -844,6 +940,9 @@ function boshlang(){
     formaToza(); javobKor('Shakl tozalandi.');
   });
   document.getElementById('eksport').addEventListener('click', eksport);
+  document.getElementById('yangila').addEventListener('click', () => {
+    javobKor('Yangilanmoqda…'); apiYukla();
+  });
   document.getElementById('import').addEventListener('click', () =>
     document.getElementById('fayl').click());
   document.getElementById('fayl').addEventListener('change', (e) => {
@@ -876,8 +975,12 @@ function boshlang(){
             document.getElementById('tafsilot').scrollIntoView({ behavior:'smooth', block:'nearest' });
             return; }
   });
+  // Boshqa oynada tasdiqlangan bo'lsa, sahifaga qaytilganda o'zi yangilanadi.
+  window.addEventListener('focus', () => { if (apiBor) apiYukla(); });
 
   chiz();
+  holatYozuv();
+  apiYukla();
 }
 
 boshlang();
