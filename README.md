@@ -12,8 +12,12 @@ Bitta statik sahifa — server ham, baza ham kerak emas. Vercel'da shundayligich
 - **Tadbir kartochkasi** — katakka bosilsa pastda ochiladi: maqsad, kerakli jihoz,
   tayyorgarlik bosqichlari (3 haftadan o'sha kunigacha), kun tartibi daqiqalar bilan,
   nima bilan tugashi va diqqat qilinadigan joyi.
-- **Taklif shakli** — ustoz tadbir taklifini to'ldiradi, sahifa tayyor matn chiqaradi;
-  uni nusxalab maktab ma'muriga yuboradi. Sahifa hech narsa saqlamaydi va hech qayerga yubormaydi.
+- **Tadbir qo'shish** — yangi tadbir kiritiladi va darhol jadvalga tushadi: nomi, turi, oy va hafta,
+  qaysi sinflar (1–10 yoki butun maktab), fan, izoh va kerakli narsalar. Qo'shilgan tadbirni
+  tahrirlash va o'chirish mumkin.
+- **Saqlash** — qo'shilgan tadbirlar brauzerning o'zida (localStorage) saqlanadi: sahifa yopilsa ham
+  qoladi, lekin faqat shu qurilmada. Boshqalarga berish uchun «JSON yuklab olish», qabul qilish
+  uchun «JSON yuklash» — shu bilan bir ustozning tadbirlari ikkinchisiga o'tadi.
 
 ## Fayllar
 

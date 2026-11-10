@@ -204,9 +204,29 @@ form{display:flex;flex-direction:column;gap:13px}
 .javob.ok{background:color-mix(in srgb,var(--t-ekskursiya) 14%,transparent);color:var(--t-ekskursiya)}
 .javob.xato{background:var(--asos-yum);color:var(--asos)}
 .holat-satr{font-size:12.5px;color:var(--oqish);margin-top:10px;line-height:1.5}
-.taklif-matn{margin:0;padding:15px 17px;border:1px solid var(--chiziq);border-radius:10px;
-  background:var(--qogoz);font:400 13.5px/1.6 ui-monospace,SFMono-Regular,Consolas,monospace;
-  white-space:pre-wrap;word-break:break-word;color:var(--siyoh);min-height:200px}
+.sinf-tanlov{display:flex;gap:5px;flex-wrap:wrap}
+.sinf-tanlov button{padding:5px 11px;border:1px solid var(--chiziq);border-radius:999px;
+  background:transparent;color:var(--xira);font-size:12.5px;font-weight:600;cursor:pointer;
+  font-variant-numeric:tabular-nums}
+.sinf-tanlov button[aria-pressed="true"]{background:var(--asos);border-color:var(--asos);
+  color:#fff}
+.sinf-tanlov button.hamma[aria-pressed="true"]{background:var(--siyoh);border-color:var(--siyoh)}
+.q-kart{border:1px solid var(--chiziq);border-left:3px solid var(--t-taklif);border-radius:10px;
+  padding:12px 14px;background:var(--qogoz)}
+.q-kart .bosh{display:flex;justify-content:space-between;gap:10px;align-items:baseline;
+  flex-wrap:wrap}
+.q-kart .bosh b{font-size:14.5px;font-weight:600;letter-spacing:-.01em}
+.q-kart .meta{font-size:11.5px;color:var(--oqish)}
+.q-kart p{margin-top:5px;font-family:var(--matn);font-size:14px;line-height:1.5;color:var(--xira)}
+.q-amal{display:flex;gap:7px;margin-top:9px}
+.q-amal button{padding:4px 11px;border:1px solid var(--chiziq);border-radius:7px;
+  background:transparent;color:var(--xira);font-size:11.5px;font-weight:600;cursor:pointer}
+.q-amal button:hover{border-color:var(--asos);color:var(--asos)}
+.fayl-amal{display:flex;gap:9px;flex-wrap:wrap;margin-top:14px}
+.fayl-amal button{padding:7px 13px;border:1px solid var(--chiziq);border-radius:8px;
+  background:var(--mato);color:var(--xira);font-size:12.5px;font-weight:600;cursor:pointer}
+.fayl-amal button:hover{border-color:var(--asos);color:var(--asos)}
+.kart.qoshil{border-style:dashed;border-left-style:solid}
 .t-royxat{display:flex;flex-direction:column;gap:11px}
 .t-kart{border:1px solid var(--chiziq);border-left:3px solid var(--t-taklif);border-radius:10px;
   padding:13px 15px;background:var(--qogoz)}
@@ -235,7 +255,7 @@ form{display:flex;flex-direction:column;gap:13px}
   <h1>Tadbirlar taqvimi</h1>
   <p class="tavsif">Har shanba bitta tadbir: robototexnika har hafta, IT oyda bir marta,
      AI chorakda bir marta. Katakka bosing — tadbirning maqsadi, tayyorgarligi va kun tartibi
-     chiqadi. Pastda o'z taklifingizni yozib, tayyor matnini nusxalashingiz mumkin.</p>
+     chiqadi. Pastdan yangi tadbir qo'shsangiz, u ham shu jadvalga tushadi.</p>
   <div class="sonlar" id="sonlar"></div>
   <div class="izohlar" id="izohlar"></div>
 </div></header>
@@ -257,31 +277,16 @@ form{display:flex;flex-direction:column;gap:13px}
 </main>
 
 <section class="taklif-band"><div class="ichi">
-  <h2>Ustozlar takliflari</h2>
-  <p class="tavsif">Taqvimga qo'shilishi kerak bo'lgan tadbirni shu yerga yozing: qaysi hafta,
-     qaysi sinflar, nima bo'ladi va nima kerak. O'ng tomonda tayyor matn chiqadi — uni nusxalab
-     maktab ma'muriga yuboring. Sahifa hech narsa saqlamaydi.</p>
+  <h2 id="qoshish">Tadbir qo'shish</h2>
+  <p class="tavsif">Yangi tadbirni shu yerdan kiriting — u darhol yuqoridagi jadvalga tushadi.
+     Qo'shilgan tadbirlar shu brauzerda saqlanadi; boshqalarga berish uchun «JSON yuklab olish»
+     tugmasidan foydalaning.</p>
   <div class="ikki">
     <form id="forma" novalidate>
       <div class="juft">
-        <div class="maydon"><label for="f-ism">Ism, familiya</label>
-          <input id="f-ism" name="ism" autocomplete="name" maxlength="60" required></div>
-        <div class="maydon"><label for="f-fan">Fan</label>
-          <select id="f-fan" name="fan">
-            <option value="Robototexnika">Robototexnika</option>
-            <option value="IT">IT</option>
-            <option value="AI">AI</option>
-            <option value="Boshqa">Boshqa</option>
-          </select></div>
-      </div>
-      <div class="juft">
-        <div class="maydon"><label for="f-oy">Oy</label><select id="f-oy" name="oy"></select></div>
-        <div class="maydon"><label for="f-hafta">Hafta</label>
-          <select id="f-hafta" name="hafta"></select></div>
-      </div>
-      <div class="juft">
-        <div class="maydon"><label for="f-sinf">Qaysi sinflar</label>
-          <input id="f-sinf" name="sinf" maxlength="60" placeholder="masalan: 2-3-4-sinf"></div>
+        <div class="maydon"><label for="f-nom">Tadbir nomi</label>
+          <input id="f-nom" name="nom" maxlength="90" placeholder="masalan: Roborace musobaqasi"
+            required></div>
         <div class="maydon"><label for="f-tur">Tadbir turi</label>
           <select id="f-tur" name="tur">
             <option value="taqdimot">Taqdimot</option>
@@ -291,8 +296,25 @@ form{display:flex;flex-direction:column;gap:13px}
             <option value="maktab">Loyiha kuni</option>
           </select></div>
       </div>
-      <div class="maydon"><label for="f-nom">Tadbir nomi</label>
-        <input id="f-nom" name="nom" maxlength="90" placeholder="masalan: Roborace musobaqasi" required></div>
+      <div class="juft">
+        <div class="maydon"><label for="f-oy">Oy</label><select id="f-oy" name="oy"></select></div>
+        <div class="maydon"><label for="f-hafta">Hafta</label>
+          <select id="f-hafta" name="hafta"></select></div>
+      </div>
+      <div class="maydon"><label>Qaysi sinflar</label>
+        <div class="sinf-tanlov" id="f-sinflar"></div></div>
+      <div class="juft">
+        <div class="maydon"><label for="f-fan">Fan</label>
+          <select id="f-fan" name="fan">
+            <option value="robo">Robototexnika</option>
+            <option value="it">IT</option>
+            <option value="ai">AI</option>
+            <option value="boshqa">Boshqa</option>
+          </select></div>
+        <div class="maydon"><label for="f-kim">Kim qo'shdi</label>
+          <input id="f-kim" name="kim" autocomplete="name" maxlength="60"
+            placeholder="Ism, familiya"></div>
+      </div>
       <div class="maydon"><label for="f-matn">Nima bo'ladi</label>
         <textarea id="f-matn" name="matn" maxlength="900" rows="4"
           placeholder="Qanday o'tadi, kim qatnashadi, qancha davom etadi" required></textarea></div>
@@ -300,16 +322,21 @@ form{display:flex;flex-direction:column;gap:13px}
         <textarea id="f-kerak" name="kerak" maxlength="400" rows="2"
           placeholder="Jihoz, xona, byudjet, yordam"></textarea></div>
       <div class="tugmalar">
-        <button class="asosiy" type="button" id="nusxa">Matnni nusxalash</button>
+        <button class="asosiy" type="submit" id="saqla">Tadbirni qo'shish</button>
+        <button class="ikkinchi" type="button" id="bekor">Tozalash</button>
       </div>
       <p class="javob" id="javob"></p>
     </form>
     <div>
-      <h3 id="t-sarlavha">Yuborish uchun tayyor matn</h3>
-      <pre class="taklif-matn" id="matn-oyna"></pre>
-      <p class="holat-satr">Shaklni to'ldiring — matn shu yerda o'zi yoziladi.
-         «Matnni nusxalash» tugmasini bosing va maktab ma'muriga Telegram orqali yuboring.
-         Taklif shu sahifada saqlanmaydi.</p>
+      <h3 id="q-sarlavha">Qo'shilgan tadbirlar</h3>
+      <div class="t-royxat" id="q-royxat"></div>
+      <div class="fayl-amal">
+        <button type="button" id="eksport">JSON yuklab olish</button>
+        <button type="button" id="import">JSON yuklash</button>
+        <input type="file" id="fayl" accept="application/json,.json" hidden>
+      </div>
+      <p class="holat-satr">Qo'shilgan tadbirlar faqat shu brauzerda saqlanadi.
+         Boshqa kompyuterga yoki umumiy rejaga o'tkazish uchun JSON faylni yuboring.</p>
     </div>
   </div>
 </div></section>
@@ -325,6 +352,27 @@ const TUR_RANG = { taqdimot:'var(--t-taqdimot)', ekskursiya:'var(--t-ekskursiya)
   musobaqa:'var(--t-musobaqa)', kun:'var(--t-kun)', maktab:'var(--t-maktab)' };
 
 let oyIdx = 0, tanlov = null, sinfFiltr = 'all', korinish = 'oy';
+let QOSHIL = [];          // qo'shilgan tadbirlar (brauzerda saqlanadi)
+let tahrirId = null;      // tahrir qilinayotgan tadbir
+const SAQLAGICH = 'najot-tadbirlar-v1';
+
+/** Brauzer xotirasi ishlamasligi mumkin (maxfiy oyna, o'chirilgan cookie) — xato chiqmasin. */
+function qoshilOqi(){
+  try {
+    const x = JSON.parse(localStorage.getItem(SAQLAGICH) || '[]');
+    return Array.isArray(x) ? x : [];
+  } catch (e){ return []; }
+}
+
+function qoshilYoz(){
+  try { localStorage.setItem(SAQLAGICH, JSON.stringify(QOSHIL)); }
+  catch (e){ javobKor("Brauzer xotirasiga saqlanmadi — JSON faylga yuklab oling.", true); }
+}
+
+/** Shu oyning tadbirlari: rejadagi + qo'shilgan. */
+function oyTadbir(i){
+  return MA.oylar[i].tadbirlar.concat(QOSHIL.filter(q => q.oyIdx === i));
+}
 
 const esc = (x) => String(x ?? '').replace(/[&<>"']/g, (c) =>
   ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
@@ -337,13 +385,16 @@ function dushanba(sana){
   return t.toISOString().slice(0, 10);
 }
 const tadbirTop = (kod) => {
-  for (const oy of MA.oylar){ const t = oy.tadbirlar.find(x => x.kod === kod); if (t) return { t, oy }; }
+  for (let i = 0; i < MA.oylar.length; i++){
+    const t = oyTadbir(i).find(x => x.kod === kod);
+    if (t) return { t, oy: MA.oylar[i] };
+  }
   return null;
 };
 
 /* ---------------- shapka ---------------- */
 function shapkaChiz(){
-  const jami = MA.oylar.reduce((n, o) => n + o.tadbirlar.length, 0);
+  const jami = MA.oylar.reduce((n, o, i) => n + oyTadbir(i).length, 0);
   const shanba = MA.oylar.reduce((n, o) => n + o.haftalar.filter(h => !h.tatil).length, 0);
   const son = [[jami, 'tadbir'], [shanba, 'shanba'], [MA.guruhlar.length, 'sinf va guruh'],
                [3, 'fan: robo · IT · AI']];
@@ -394,7 +445,7 @@ function ustunlar(){
 
 /** Ustunga tushadigan tadbirlar. */
 function ustunTadbir(u, mos){
-  return MA.oylar[u.oyIdx].tadbirlar.filter(t => (u.yil || t.kun === u.kun) && mos(t));
+  return oyTadbir(u.oyIdx).filter(t => (u.yil || t.kun === u.kun) && mos(t));
 }
 
 function oylarChiz(){
@@ -405,7 +456,7 @@ function oylarChiz(){
   quti.hidden = false;
   if (korinish === 'chorak'){
     quti.innerHTML = choraklar().map(c => {
-      const son = c.oylar.reduce((n, i) => n + MA.oylar[i].tadbirlar.length, 0);
+      const son = c.oylar.reduce((n, i) => n + oyTadbir(i).length, 0);
       return `<button class="oy-t" type="button" data-oy="${c.oylar[0]}"
         aria-pressed="${c.oylar.includes(oyIdx)}">${esc(c.nom.split(' · ')[0])}<b>${son}</b></button>`;
     }).join('');
@@ -413,12 +464,12 @@ function oylarChiz(){
   }
   quti.innerHTML = MA.oylar.map((o, i) =>
     `<button class="oy-t" type="button" data-oy="${i}" aria-pressed="${i === oyIdx}">${
-      esc(o.oy.split(' ')[0])}<b>${o.tadbirlar.length}</b></button>`).join('');
+      esc(o.oy.split(' ')[0])}<b>${oyTadbir(i).length}</b></button>`).join('');
 }
 
 function sinflarChiz(){
   const yil = {};
-  for (const o of MA.oylar) for (const t of o.tadbirlar) for (const s of t.sinflar)
+  for (let i = 0; i < MA.oylar.length; i++) for (const t of oyTadbir(i)) for (const s of t.sinflar)
     yil[s] = (yil[s] || 0) + 1;
   const chip = (id, nom, son) => `<button class="sinf-t" type="button" data-sinf="${esc(id)}"
     aria-pressed="${sinfFiltr === id}">${esc(nom)}${son == null ? '' : `<b>${son}</b>`}</button>`;
@@ -437,7 +488,7 @@ function davrNomi(){
 
 function filtrIzoh(){
   let oz = 0, umum = 0;
-  for (const i of korOylar()) for (const t of MA.oylar[i].tadbirlar){
+  for (const i of korOylar()) for (const t of oyTadbir(i)){
     if (!t.sinflar.length) umum++;
     else if (sinfFiltr === 'all' || t.sinflar.includes(sinfFiltr)) oz++;
   }
@@ -493,17 +544,20 @@ function jadvalChiz(){
 }
 
 function tadbirKart(t, sanaBilan){
-  return `<button class="kart" type="button" data-kod="${esc(t.kod)}" data-tur="${esc(t.tur)}"
+  return `<button class="kart${t.qoshilgan ? ' qoshil' : ''}" type="button"
+      data-kod="${esc(t.kod)}" data-tur="${esc(t.tur)}"
       aria-pressed="${tanlov === t.kod}" title="${esc(t.nom)}">
-    <span class="tur">${esc(MA.turNom[t.tur] || '')}</span>
+    <span class="tur">${esc(MA.turNom[t.tur] || '')}${t.qoshilgan ? ' · yangi' : ''}</span>
     <span class="nom">${esc(t.nom)}</span>
     <span class="kim">${sanaBilan ? esc(kartSana(t)) + ' · ' : ''}${
-      esc(MA.fanNom[t.fan] || '')}${t.vaqt ? ' · ' + esc(t.vaqt) : ''}</span>
+      esc(MA.fanNom[t.fan] || (t.fan === 'boshqa' ? 'Boshqa' : t.fan) || '')}${
+      t.vaqt ? ' · ' + esc(t.vaqt) : ''}</span>
   </button>`;
 }
 
 /** Chorak va yil jadvalida kartochkada sana ham turadi: «14-noy». */
 function kartSana(t){
+  if (t.oy) return `${t.kun}-${t.oy}`;
   const o = MA.oylar.find(x => x.tadbirlar.some(y => y.kod === t.kod));
   return o ? `${t.kun}-${o.qisqa}` : t.kun;
 }
@@ -517,6 +571,29 @@ function tafsilotChiz(){
   if (!r){ quti.innerHTML = ''; return; }
   const { t, oy } = r;
   const fakt = (n, v) => v ? `<div class="fakt"><span>${esc(n)}</span><b>${esc(v)}</b></div>` : '';
+  if (t.qoshilgan){
+    quti.innerHTML = `<div class="tafsilot" style="--t:${TUR_RANG[t.tur] || 'var(--xira)'}">
+      <div class="yorliqlar">
+        <span class="yor rang">${esc(MA.turNom[t.tur] || '')}</span>
+        <span class="yor">${esc(MA.fanNom[t.fan] || 'Boshqa')}</span>
+        <span class="yor">${esc(t.kun)}-${esc(t.oy)} · ${esc(t.hafta || '')}</span>
+        <span class="yor">Qo'shilgan</span>
+      </div>
+      <h2>${esc(t.nom)}</h2>
+      <p class="t-izoh">${esc(t.izoh || '')}</p>
+      <div class="faktlar">
+        ${fakt('Kim chiqadi', t.sinflar.length ? t.sinflar.join(', ') : 'Butun maktab')}
+        ${fakt("Kim qo'shdi", t.kim)}
+        ${fakt('Qachon kiritilgan', t.vaqtMatn)}
+        ${fakt('Nima kerak', t.kerak)}
+      </div>
+      <div class="q-amal" style="margin-top:18px">
+        <button type="button" data-tahrir="${esc(t.kod)}">Tahrirlash</button>
+        <button type="button" data-ochir="${esc(t.kod)}">O'chirish</button>
+      </div>
+    </div>`;
+    return;
+  }
   const ro = (x) => (x || []).map(y => `<li>${esc(y)}</li>`).join('');
   const vq = (x, s) => (x || []).map(([a, b]) =>
     `<div class="vq${s}"><b>${esc(a)}</b><span>${esc(b)}</span></div>`).join('');
@@ -564,14 +641,27 @@ function haftaTanlov(){
     `<option value="${i}">${esc(h.nom)} · ${esc(h.qisqa)}${h.tatil ? " (ta'til)" : ''}</option>`).join('');
 }
 
+/** Sinf tanlash chiplari: «Butun maktab» yoki 1–10-sinflardan bir nechtasi. */
+let tanlanganSinf = [];
+
+function sinfTanlovChiz(){
+  const chip = (id, nom, hamma) => `<button type="button" data-fsinf="${esc(id)}"
+    class="${hamma ? 'hamma' : ''}" aria-pressed="${
+      hamma ? tanlanganSinf.length === 0 : tanlanganSinf.includes(id)}">${esc(nom)}</button>`;
+  document.getElementById('f-sinflar').innerHTML = chip('', 'Butun maktab', true)
+    + MA.guruhlar.map(g => chip(g.id, g.id.replace('-sinf', ''), false)).join('');
+}
+
 function formaOqi(){
   const ol = (id) => (document.getElementById(id).value || '').trim();
   const oy = MA.oylar[Number(document.getElementById('f-oy').value) || 0];
   const h = oy.haftalar[Number(document.getElementById('f-hafta').value) || 0];
-  return { ism: ol('f-ism').slice(0, 60), fan: ol('f-fan'), sinf: ol('f-sinf').slice(0, 60),
-           tur: ol('f-tur'), nom: ol('f-nom').slice(0, 90), matn: ol('f-matn').slice(0, 900),
-           kerak: ol('f-kerak').slice(0, 400), oy: oy.qisqa, oyNom: oy.oy, kun: h.kun,
-           hafta: h.nom, sana: h.sana };
+  return { nom: ol('f-nom').slice(0, 90), tur: ol('f-tur'), fan: ol('f-fan'),
+           kim: ol('f-kim').slice(0, 60), izoh: ol('f-matn').slice(0, 900),
+           kerak: ol('f-kerak').slice(0, 400),
+           oyIdx: Number(document.getElementById('f-oy').value) || 0,
+           oy: oy.qisqa, kun: h.kun, hafta: h.nom, sana: h.sana,
+           sinflar: tanlanganSinf.slice() };
 }
 
 function javobKor(matn, xato){
@@ -581,23 +671,145 @@ function javobKor(matn, xato){
 }
 
 function tekshir(d){
-  if (d.ism.length < 3) return 'Ism va familiyangizni yozing.';
   if (d.nom.length < 4) return 'Tadbir nomini yozing.';
-  if (d.matn.length < 15) return 'Nima bo\'lishini bir-ikki gapda yozing.';
+  if (d.izoh.length < 10) return "Nima bo'lishini bir-ikki gapda yozing.";
   return '';
 }
 
-function nusxaMatn(){
-  const d = formaOqi();
-  return `TADBIR TAKLIFI\n\n${d.nom}\n${d.oyNom}, ${d.hafta} (${d.kun}-${d.oy}) · `
-    + `${MA.turNom[d.tur] || d.tur}\nUstoz: ${d.ism} · ${d.fan}`
-    + (d.sinf ? `\nSinflar: ${d.sinf}` : '')
-    + `\n\nNima bo'ladi:\n${d.matn}`
-    + (d.kerak ? `\n\nNima kerak:\n${d.kerak}` : '');
+function formaToza(){
+  for (const i of ['f-nom', 'f-matn', 'f-kerak']) document.getElementById(i).value = '';
+  tanlanganSinf = [];
+  tahrirId = null;
+  document.getElementById('saqla').textContent = "Tadbirni qo'shish";
+  sinfTanlovChiz();
 }
 
-function matnYangila(){
-  document.getElementById('matn-oyna').textContent = nusxaMatn();
+function qoshish(){
+  const d = formaOqi();
+  const x = tekshir(d);
+  if (x) return javobKor(x, true);
+  const n = new Date();
+  if (tahrirId){
+    const eski = QOSHIL.find(q => q.kod === tahrirId);
+    Object.assign(eski, d, { vaqtMatn: eski.vaqtMatn });
+    javobKor('Tadbir yangilandi.');
+  } else {
+    const kod = 'q-' + n.getTime().toString(36) + Math.random().toString(36).slice(2, 6);
+    QOSHIL.push(Object.assign({ kod, qoshilgan: true, vaqt: n.toISOString(),
+      vaqtMatn: `${String(n.getDate()).padStart(2, '0')}.${
+        String(n.getMonth() + 1).padStart(2, '0')}.${n.getFullYear()}` }, d));
+    javobKor(`«${d.nom}» jadvalga qo'shildi — ${d.kun}-${d.oy}.`);
+    tanlov = kod;
+  }
+  qoshilYoz();
+  oyIdx = d.oyIdx;
+  const t = tahrirId;
+  formaToza();
+  if (t) tanlov = t;
+  chiz();
+  document.getElementById('jadval').scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function tahrirla(kod){
+  const t = QOSHIL.find(q => q.kod === kod);
+  if (!t) return;
+  tahrirId = kod;
+  document.getElementById('f-nom').value = t.nom;
+  document.getElementById('f-tur').value = t.tur;
+  document.getElementById('f-fan').value = t.fan;
+  document.getElementById('f-kim').value = t.kim || '';
+  document.getElementById('f-matn').value = t.izoh || '';
+  document.getElementById('f-kerak').value = t.kerak || '';
+  document.getElementById('f-oy').value = String(t.oyIdx);
+  haftaTanlov();
+  const h = MA.oylar[t.oyIdx].haftalar.findIndex(x => x.kun === t.kun);
+  document.getElementById('f-hafta').value = String(h < 0 ? 0 : h);
+  tanlanganSinf = (t.sinflar || []).slice();
+  sinfTanlovChiz();
+  document.getElementById('saqla').textContent = 'Saqlash';
+  javobKor("Tahrir rejimi — o'zgartirib «Saqlash» tugmasini bosing.");
+  document.getElementById('qoshish').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function ochir(kod){
+  const i = QOSHIL.findIndex(q => q.kod === kod);
+  if (i < 0) return;
+  const nom = QOSHIL[i].nom;
+  QOSHIL.splice(i, 1);
+  qoshilYoz();
+  if (tanlov === kod) tanlov = null;
+  if (tahrirId === kod) formaToza();
+  chiz();
+  javobKor(`«${nom}» o'chirildi.`);
+}
+
+function qoshilRoyxat(){
+  const quti = document.getElementById('q-royxat');
+  document.getElementById('q-sarlavha').textContent =
+    QOSHIL.length ? `Qo'shilgan tadbirlar (${QOSHIL.length})` : "Qo'shilgan tadbirlar";
+  if (!QOSHIL.length){
+    quti.innerHTML = `<div class="bosh-holat">Hali qo'shilgan tadbir yo'q. Chapdagi shaklni
+      to'ldiring — tadbir darhol jadvalda paydo bo'ladi.</div>`;
+    return;
+  }
+  const tartib = QOSHIL.slice().sort((a, b) => (a.sana || '').localeCompare(b.sana || ''));
+  quti.innerHTML = tartib.map(t => `<article class="q-kart">
+    <div class="bosh"><b>${esc(t.nom)}</b>
+      <span class="meta">${esc(t.kun)}-${esc(t.oy)} · ${esc(MA.turNom[t.tur] || t.tur)}</span></div>
+    <span class="meta">${esc(t.sinflar.length ? t.sinflar.join(', ') : 'Butun maktab')}${
+      t.kim ? ' · ' + esc(t.kim) : ''}</span>
+    <p>${esc(t.izoh || '')}</p>
+    <div class="q-amal">
+      <button type="button" data-tahrir="${esc(t.kod)}">Tahrirlash</button>
+      <button type="button" data-ochir="${esc(t.kod)}">O'chirish</button>
+    </div>
+  </article>`).join('');
+}
+
+async function eksport(){
+  if (!QOSHIL.length) return javobKor("Yuklab olishga tadbir yo'q.", true);
+  const matn = JSON.stringify(QOSHIL, null, 1);
+  const nom = 'tadbirlar-qoshimcha.json';
+  // claude.ai da ulashilgan nusxada oddiy yuklab olish ishlamaydi — o'sha muhitning
+  // o'z usuli ishlatiladi; Vercel va oddiy saytda esa odatdagi havola.
+  const c = window.claude;
+  if (c && typeof c.use === 'function'){
+    try {
+      const y = await c.use('downloads');
+      if (y){
+        await y.save({ filename: nom, data: matn });
+        return javobKor(`${QOSHIL.length} ta tadbir faylga yozildi.`);
+      }
+    } catch (e){ /* pastdagi oddiy usulga o'tamiz */ }
+  }
+  const b = new Blob([matn], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(b);
+  a.download = nom;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  javobKor(`${QOSHIL.length} ta tadbir faylga yozildi.`);
+}
+
+function importQil(fayl){
+  const o = new FileReader();
+  o.onload = () => {
+    let yangi;
+    try { yangi = JSON.parse(o.result); } catch (e){ return javobKor('Fayl JSON emas.', true); }
+    if (!Array.isArray(yangi)) return javobKor("Faylda tadbirlar ro'yxati yo'q.", true);
+    let n = 0;
+    for (const t of yangi){
+      if (!t || !t.kod || !t.nom) continue;
+      const i = QOSHIL.findIndex(q => q.kod === t.kod);
+      if (i < 0){ QOSHIL.push(Object.assign({ qoshilgan: true, sinflar: [] }, t)); n++; }
+    }
+    qoshilYoz();
+    chiz();
+    javobKor(n ? `${n} ta yangi tadbir qo'shildi.` : 'Yangi tadbir topilmadi — hammasi bor edi.');
+  };
+  o.readAsText(fayl);
 }
 
 /* ---------------- umumiy ---------------- */
@@ -607,9 +819,11 @@ function chiz(){
   filtrIzoh();
   jadvalChiz();
   tafsilotChiz();
+  qoshilRoyxat();
 }
 
 function boshlang(){
+  QOSHIL = qoshilOqi();
   shapkaChiz();
   const bu = bugun();
   const i = MA.oylar.findIndex(o => o.tadbirlar.some(t => t.sana >= bu));
@@ -621,23 +835,20 @@ function boshlang(){
     `<option value="${i}">${esc(o.oy)}</option>`).join('');
   document.getElementById('f-oy').value = String(oyIdx);
   haftaTanlov();
-  document.getElementById('f-oy').addEventListener('change', () => {
-    haftaTanlov(); matnYangila();
+  document.getElementById('f-oy').addEventListener('change', haftaTanlov);
+  sinfTanlovChiz();
+  document.getElementById('forma').addEventListener('submit', (e) => {
+    e.preventDefault(); qoshish();
   });
-  document.getElementById('forma').addEventListener('submit', (e) => e.preventDefault());
-  document.getElementById('forma').addEventListener('input', matnYangila);
-  document.getElementById('f-oy').addEventListener('change', matnYangila);
-  document.getElementById('f-hafta').addEventListener('change', matnYangila);
-  document.getElementById('nusxa').addEventListener('click', async () => {
-    const x = tekshir(formaOqi());
-    if (x) return javobKor(x, true);
-    const matn = nusxaMatn();
-    try {
-      await navigator.clipboard.writeText(matn);
-      javobKor('Matn nusxalandi — Telegramga qo\'yib yuborsangiz bo\'ladi.');
-    } catch (e){
-      javobKor('Nusxalanmadi. Matnni qo\'lda belgilab oling.', true);
-    }
+  document.getElementById('bekor').addEventListener('click', () => {
+    formaToza(); javobKor('Shakl tozalandi.');
+  });
+  document.getElementById('eksport').addEventListener('click', eksport);
+  document.getElementById('import').addEventListener('click', () =>
+    document.getElementById('fayl').click());
+  document.getElementById('fayl').addEventListener('change', (e) => {
+    if (e.target.files[0]) importQil(e.target.files[0]);
+    e.target.value = '';
   });
   document.addEventListener('click', (e) => {
     const oyT = e.target.closest('[data-oy]');
@@ -646,6 +857,20 @@ function boshlang(){
     if (dT){ korinish = dT.dataset.davr; tanlov = null; return chiz(); }
     const sT = e.target.closest('[data-sinf]');
     if (sT){ sinfFiltr = sT.dataset.sinf; return chiz(); }
+    const fs = e.target.closest('[data-fsinf]');
+    if (fs){
+      const id = fs.dataset.fsinf;
+      if (!id) tanlanganSinf = [];
+      else if (tanlanganSinf.includes(id))
+        tanlanganSinf = tanlanganSinf.filter(x => x !== id);
+      else tanlanganSinf.push(id);
+      tanlanganSinf.sort((a, b) => parseInt(a) - parseInt(b));
+      return sinfTanlovChiz();
+    }
+    const th = e.target.closest('[data-tahrir]');
+    if (th) return tahrirla(th.dataset.tahrir);
+    const oc = e.target.closest('[data-ochir]');
+    if (oc) return ochir(oc.dataset.ochir);
     const k = e.target.closest('[data-kod]');
     if (k){ tanlov = k.dataset.kod; jadvalChiz(); tafsilotChiz();
             document.getElementById('tafsilot').scrollIntoView({ behavior:'smooth', block:'nearest' });
@@ -653,7 +878,6 @@ function boshlang(){
   });
 
   chiz();
-  matnYangila();
 }
 
 boshlang();
