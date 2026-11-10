@@ -18,7 +18,7 @@ Sahifa statik; tadbir qo'shish va tasdiqlash uchun uchta kichik serverless funks
 
 ```
 Ustoz qo'shadi
-   POST /api/taklif        → tadbir «kutilmoqda» holatida KV bazaga yoziladi
+   POST /api/taklif        → tadbir «kutilmoqda» holatida bazaga yoziladi
                            → Telegramga xabar: TASDIQLASH / RAD ETISH havolalari
 Ma'mur havolani bosadi
    GET /api/qaror          → imzo tekshiriladi, holat «tasdiq» yoki «rad» bo'ladi
@@ -38,7 +38,8 @@ topib bo'lmaydi.
 | `api/taklif.js` | yangi tadbirni qabul qiladi va Telegramga yuboradi |
 | `api/qaror.js` | Telegramdagi tasdiqlash/rad etish havolasi |
 | `api/tadbirlar.js` | tasdiqlangan tadbirlar ro'yxati |
-| `api/_umumiy.js` | KV, imzo va Telegram yordamchilari |
+| `api/_umumiy.js` | baza, imzo va Telegram yordamchilari |
+| `supabase.sql` | jadvalni yaratadigan SQL (bir marta ishga tushiriladi) |
 | `belgi.svg` | brauzer yorlig'i |
 
 Kutubxona ishlatilmaydi — `npm install` ham, build ham kerak emas.
@@ -47,10 +48,11 @@ Kutubxona ishlatilmaydi — `npm install` ham, build ham kerak emas.
 
 1. **Loyihani ulash**: [vercel.com/new](https://vercel.com/new) → bu repo → Framework: *Other*,
    Build Command va Output Directory bo'sh → Deploy.
-2. **Baza**: loyihaning *Storage* bo'limi → *Upstash for Redis* (KV) yarating va shu loyihaga
-   ulang. Vercel `KV_REST_API_URL` va `KV_REST_API_TOKEN` (yoki `UPSTASH_REDIS_REST_*`)
-   sozlamalarini o'zi qo'shadi — kod ikkalasini ham tushunadi.
-3. **Sozlamalar**: *Settings → Environment Variables* ga qo'shing:
+2. **Baza**: loyihaning *Storage* bo'limidan **Supabase** ni ulang (Custom Prefix bo'sh qolsin —
+   shunda `SUPABASE_URL` va `SUPABASE_SERVICE_ROLE_KEY` nomlari bilan keladi).
+3. **Jadval**: Supabase panelida *SQL Editor* ni oching, shu repodagi `supabase.sql` ni
+   nusxalab ishga tushiring. Jadval RLS bilan yopiq — unga faqat server funksiyalari kiradi.
+4. **Sozlamalar**: Vercel *Settings → Environment Variables* ga qo'shing:
 
    | Nomi | Qiymati |
    |---|---|
@@ -61,10 +63,14 @@ Kutubxona ishlatilmaydi — `npm install` ham, build ham kerak emas.
 
    `IMZO_KALIT` ni yasash: `node -e "console.log(require('crypto').randomBytes(24).toString('hex'))"`
 
-4. Sozlamalarni qo'shgach **Redeploy** qiling — funksiyalar yangi qiymatlarni shunda oladi.
+5. Sozlamalarni qo'shgach **Redeploy** qiling — funksiyalar yangi qiymatlarni shunda oladi.
 
 Sozlanmaguncha sahifa ishlayveradi: tadbir faqat o'sha brauzerda saqlanadi va «Server ulanmagan»
 deb yozib turadi. Hech narsa buzilmaydi.
+
+Agar Supabase integratsiyasi kalitlarni boshqa nom bilan qo'shsa (masalan prefiks bilan),
+`SUPABASE_URL` va `SUPABASE_SERVICE_ROLE_KEY` nomlarini qo'lda qo'shib qo'ying — kod shularni
+va `NEXT_PUBLIC_SUPABASE_URL` / `SUPABASE_ANON_KEY` nomlarini ham tushunadi.
 
 ## Yangilash
 

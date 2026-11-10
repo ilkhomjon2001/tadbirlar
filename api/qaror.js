@@ -11,19 +11,22 @@ module.exports = async (req, res) => {
     return U.sahifa(res, 403, 'Havola yaroqsiz',
       'Imzo to’g’ri kelmadi. Havolani to’liq nusxalanganiga ishonch hosil qiling.');
 
-  let ro;
-  try { ro = await U.kvOqi(); } catch (e) {
+  let x;
+  try {
+    x = await U.bitta(id);
+  } catch (e) {
+    console.error('qaror: baza xatosi', e.message);
     return U.sahifa(res, 503, 'Baza javob bermadi', 'Birozdan keyin qayta urinib ko’ring.');
   }
-  const x = ro.find((y) => y.id === id);
   if (!x) return U.sahifa(res, 404, 'Tadbir topilmadi', 'U o’chirilgan bo’lishi mumkin.');
   if (x.holat !== 'kutilmoqda')
     return U.sahifa(res, 409, 'Allaqachon hal qilingan',
       `Bu tadbir avval <b>${x.holat === 'tasdiq' ? 'tasdiqlangan' : 'rad etilgan'}</b>.`);
 
-  x.holat = q === 'ok' ? 'tasdiq' : 'rad';
-  x.qarorVaqt = new Date().toISOString();
-  try { await U.kvYoz(ro); } catch (e) {
+  try {
+    await U.holatYoz(id, q === 'ok' ? 'tasdiq' : 'rad');
+  } catch (e) {
+    console.error('qaror yozilmadi:', e.message);
     return U.sahifa(res, 503, 'Saqlanmadi', 'Qaror yozilmadi, qayta urinib ko’ring.');
   }
 

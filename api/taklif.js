@@ -36,19 +36,21 @@ module.exports = async (req, res) => {
   if (t.izoh.length < 10) return res.status(400).json({ xato: "nima bo'lishini yozing" });
   if (!/^\d{4}-\d{2}-\d{2}$/.test(t.sana)) return res.status(400).json({ xato: 'sana xato' });
 
-  let ro;
-  try { ro = await U.kvOqi(); } catch (e) { return res.status(503).json({ xato: 'baza javob bermadi' }); }
-  if (ro.length >= U.CHEGARA) return res.status(507).json({ xato: "baza to'lib qoldi" });
-  // Bir xil tadbir ikki marta yuborilmasin (bir xil nom, sana va yuboruvchi).
-  if (ro.some((x) => x.nom === t.nom && x.sana === t.sana && x.kim === t.kim && x.holat !== 'rad'))
-    return res.status(409).json({ xato: 'bu tadbir allaqachon yuborilgan' });
+  try {
+    if (await U.bormi(t.nom, t.sana, t.kim))
+      return res.status(409).json({ xato: 'bu tadbir allaqachon yuborilgan' });
+  } catch (e) {
+    return res.status(503).json({ xato: 'baza javob bermadi' });
+  }
 
   t.id = 'q-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
   t.holat = 'kutilmoqda';
-  t.qoshilgan = true;
-  t.vaqt = new Date().toISOString();
-  ro.push(t);
-  try { await U.kvYoz(ro); } catch (e) { return res.status(503).json({ xato: 'saqlanmadi' }); }
+  try {
+    await U.qoshish(t);
+  } catch (e) {
+    console.error('taklif saqlanmadi:', e.message);
+    return res.status(503).json({ xato: 'saqlanmadi' });
+  }
 
   const baza = U.manzil(req);
   const ha = `${baza}/api/qaror?id=${t.id}&q=ok&t=${U.imzo(t.id, 'ok')}`;

@@ -1,43 +1,88 @@
-// Umumiy yordamchilar: KV baza, imzo va Telegram.
+// Umumiy yordamchilar: Supabase bazasi, imzo va Telegram.
 // Sozlamalar Vercel'ning Environment Variables bo'limida turadi, kodda emas.
+// Bazaga faqat shu funksiyalar murojaat qiladi — kalit brauzerga hech qachon chiqmaydi.
 const crypto = require('crypto');
 
-const KV_URL = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL || '';
-const KV_TOKEN = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN || '';
-const KALIT = process.env.KV_KALIT || 'tadbirlar';
+const SB_URL = (process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL
+  || process.env.SUPABASE_PROJECT_URL || '').replace(/\/+$/, '');
+const SB_KALIT = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY
+  || process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+const JADVAL = process.env.SB_JADVAL || 'tadbirlar';
 const TG_TOKEN = process.env.TG_TOKEN || '';
 const TG_ADMIN = process.env.TG_ADMIN || '';
 const IMZO_KALIT = process.env.IMZO_KALIT || '';
 const CHEGARA = 500;            // bazada saqlanadigan eng ko'p tadbir
 
 function sozlanganmi() {
-  return Boolean(KV_URL && KV_TOKEN && IMZO_KALIT);
+  return Boolean(SB_URL && SB_KALIT && IMZO_KALIT);
 }
 
-async function kvOqi() {
-  if (!KV_URL) return [];
-  const j = await fetch(`${KV_URL}/get/${encodeURIComponent(KALIT)}`, {
-    headers: { Authorization: `Bearer ${KV_TOKEN}` },
-    cache: 'no-store',
-  });
-  if (!j.ok) throw new Error(`KV o'qilmadi: ${j.status}`);
-  const d = await j.json();
-  if (!d || d.result == null) return [];
-  try {
-    const x = JSON.parse(d.result);
-    return Array.isArray(x) ? x : [];
-  } catch (e) {
-    return [];
+function boshlar(qosh) {
+  return Object.assign({
+    apikey: SB_KALIT,
+    Authorization: `Bearer ${SB_KALIT}`,
+    'Content-Type': 'application/json',
+  }, qosh || {});
+}
+
+/** PostgREST so'rovi. `yol` — jadvaldan keyingi qism, masalan "?holat=eq.tasdiq". */
+async function sb(yol, sozlama) {
+  const j = await fetch(`${SB_URL}/rest/v1/${JADVAL}${yol}`,
+    Object.assign({ cache: 'no-store' }, sozlama, { headers: boshlar((sozlama || {}).headers) }));
+  if (!j.ok) {
+    const matn = await j.text().catch(() => '');
+    throw new Error(`Supabase ${j.status}: ${matn.slice(0, 200)}`);
   }
+  const t = await j.text();
+  return t ? JSON.parse(t) : [];
 }
 
-async function kvYoz(ro) {
-  const j = await fetch(`${KV_URL}/set/${encodeURIComponent(KALIT)}`, {
+/** Bazadagi qatorni sahifa kutadigan ko'rinishga o'tkazadi. */
+function qatordan(r) {
+  return {
+    id: r.id, holat: r.holat, nom: r.nom, izoh: r.izoh || '', kerak: r.kerak || '',
+    kim: r.kim || '', tur: r.tur, fan: r.fan, oy: r.oy, oyIdx: r.oy_idx, kun: r.kun,
+    sana: r.sana, hafta: r.hafta || '', sinflar: Array.isArray(r.sinflar) ? r.sinflar : [],
+    vaqt: r.vaqt, qarorVaqt: r.qaror_vaqt,
+  };
+}
+
+async function tasdiqlanganlar() {
+  const r = await sb('?holat=eq.tasdiq&select=*&order=sana.asc&limit=' + CHEGARA);
+  return r.map(qatordan);
+}
+
+async function bitta(id) {
+  const r = await sb(`?id=eq.${encodeURIComponent(id)}&select=*&limit=1`);
+  return r.length ? qatordan(r[0]) : null;
+}
+
+async function bormi(nom, sana, kim) {
+  const s = (x) => encodeURIComponent(`"${String(x).replace(/"/g, '')}"`);
+  const r = await sb(`?nom=eq.${s(nom)}&sana=eq.${encodeURIComponent(sana)}`
+    + `&kim=eq.${s(kim || '')}&holat=neq.rad&select=id&limit=1`);
+  return r.length > 0;
+}
+
+async function qoshish(t) {
+  const r = await sb('?select=id', {
     method: 'POST',
-    headers: { Authorization: `Bearer ${KV_TOKEN}` },
-    body: JSON.stringify(ro.slice(-CHEGARA)),
+    headers: { Prefer: 'return=representation' },
+    body: JSON.stringify([{
+      id: t.id, holat: t.holat, nom: t.nom, izoh: t.izoh, kerak: t.kerak, kim: t.kim,
+      tur: t.tur, fan: t.fan, oy: t.oy, oy_idx: t.oyIdx, kun: t.kun, sana: t.sana,
+      hafta: t.hafta, sinflar: t.sinflar,
+    }]),
   });
-  if (!j.ok) throw new Error(`KV yozilmadi: ${j.status}`);
+  return r;
+}
+
+async function holatYoz(id, holat) {
+  return sb(`?id=eq.${encodeURIComponent(id)}&select=id`, {
+    method: 'PATCH',
+    headers: { Prefer: 'return=representation' },
+    body: JSON.stringify({ holat, qaror_vaqt: new Date().toISOString() }),
+  });
 }
 
 /** Telegramdagi tasdiqlash havolasi uchun imzo — faqat shu tadbir va shu qaror uchun. */
@@ -101,5 +146,5 @@ p{margin:0;color:var(--xira);font-size:14.5px}
 </style></head><body><div class="karta"><h1>${esc(sarlavha)}</h1><p>${izoh}</p></div></body></html>`);
 }
 
-module.exports = { kvOqi, kvYoz, imzo, imzoTogri, telegram, manzil, matn, esc, sahifa,
-  sozlanganmi, CHEGARA };
+module.exports = { tasdiqlanganlar, bitta, bormi, qoshish, holatYoz, imzo, imzoTogri,
+  telegram, manzil, matn, esc, sahifa, sozlanganmi, CHEGARA };
