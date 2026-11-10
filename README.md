@@ -39,6 +39,7 @@ topib bo'lmaydi.
 | `api/qaror.js` | Telegramdagi tasdiqlash/rad etish havolasi |
 | `api/tadbirlar.js` | tasdiqlangan tadbirlar ro'yxati |
 | `api/_umumiy.js` | baza, imzo va Telegram yordamchilari |
+| `api/holat.js` | sozlash to'g'ri ketganini tekshiradi (`/api/holat`) |
 | `supabase.sql` | jadvalni yaratadigan SQL (bir marta ishga tushiriladi) |
 | `belgi.svg` | brauzer yorlig'i |
 
@@ -64,6 +65,8 @@ Kutubxona ishlatilmaydi — `npm install` ham, build ham kerak emas.
    `IMZO_KALIT` ni yasash: `node -e "console.log(require('crypto').randomBytes(24).toString('hex'))"`
 
 5. Sozlamalarni qo'shgach **Redeploy** qiling — funksiyalar yangi qiymatlarni shunda oladi.
+6. **Tekshirish**: `https://<loyiha>.vercel.app/api/holat` ni oching. U qaysi sozlama bor,
+   baza javob beryaptimi va nima yetishmayotganini aytadi (maxfiy qiymatlarni ko'rsatmaydi).
 
 Sozlanmaguncha sahifa ishlayveradi: tadbir faqat o'sha brauzerda saqlanadi va «Server ulanmagan»
 deb yozib turadi. Hech narsa buzilmaydi.
